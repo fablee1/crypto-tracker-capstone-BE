@@ -1,0 +1,17 @@
+import mongoose, { Document, Model, Schema } from "mongoose"
+import { IGroupDocument } from "./group"
+
+export interface IUser {
+  name: string
+  surname: string
+  email: string
+  password?: string
+  avatar?: string
+  refreshToken?: string
+}
+
+export interface IUserDocument extends Document, IUser {}
+
+export interface IUserModel extends Model<IUserDocument> {
+  checkCredentials(email: string, password: string): Promise<IUserDocument | null>
+}
