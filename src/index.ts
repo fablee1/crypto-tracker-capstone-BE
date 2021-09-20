@@ -1,4 +1,5 @@
 import mongoose from "mongoose"
+import { startAgenda } from "./jobs/cryptoPriceFetch"
 import server from "./socket"
 
 const PORT = process.env.PORT || 3001
@@ -11,3 +12,5 @@ mongoose
     console.log("Error with connecting to DB, error: ", err)
     process.exit(1)
   })
+
+startAgenda()
