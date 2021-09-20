@@ -1,5 +1,4 @@
 import mongoose, { Document, Model, Schema } from "mongoose"
-import { IGroupDocument } from "./group"
 
 export interface IUser {
   name: string
