@@ -15,6 +15,7 @@ const CryptoCurrenciesSchema = new Schema<ICryptoCurrencyDocument, ICryptoCurren
     current_price: { type: Schema.Types.Decimal128, required: true },
     market_cap: { type: Number, required: true },
     market_cap_rank: { type: Number, required: true },
+    last1hPrice: [Number],
     fully_diluted_valuation: Number,
     total_volume: Number,
     high_24h: Schema.Types.Decimal128,

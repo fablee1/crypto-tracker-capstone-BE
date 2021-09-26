@@ -3,10 +3,12 @@ import mongoose, { Document, Model, Schema } from "mongoose"
 export interface IUser {
   name: string
   surname: string
+  username: string
   email: string
   password?: string
   avatar?: string
   refreshToken?: string
+  favourites?: string[]
 }
 
 export interface IUserDocument extends Document, IUser {}

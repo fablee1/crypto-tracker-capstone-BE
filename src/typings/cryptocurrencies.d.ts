@@ -6,6 +6,7 @@ export interface ICryptoCurrency {
   name: string
   image: string
   current_price?: number
+  last1hPrice?: number[]
   market_cap: number
   market_cap_rank: number
   fully_diluted_valuation?: number
