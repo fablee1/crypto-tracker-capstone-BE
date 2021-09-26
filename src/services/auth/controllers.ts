@@ -47,9 +47,9 @@ export const registerUser: TController = async (req, res, next) => {
 }
 
 export const loginUser: TController = async (req, res, next) => {
-  const { email, password } = req.body
+  const { login, password } = req.body
   try {
-    const user = await UserModel.checkCredentials(email, password)
+    const user = await UserModel.checkCredentials(login, password)
     if (!user) return next(createError(401, "Invalid credentials"))
     const tokens = await getTokens(user)
     sendTokens(res, tokens)

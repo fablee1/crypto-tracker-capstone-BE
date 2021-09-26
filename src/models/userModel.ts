@@ -20,7 +20,7 @@ const UserSchema = new Schema<IUserDocument, IUserModel>(
       validate: { validator: isEmail, message: "Invalid email." },
       unique: true,
     },
-    favourites: [{ type: Schema.Types.ObjectId, ref: "Crypto" }],
+    favourites: [{ type: String, ref: "Crypto" }],
     password: String,
     avatar: String,
     refreshToken: String,
@@ -33,8 +33,9 @@ UserSchema.pre("save", async function (next) {
   next()
 })
 
-UserSchema.statics.checkCredentials = async function (email, password) {
-  const user = await this.findOne({ email })
+UserSchema.statics.checkCredentials = async function (login, password) {
+  const user = await this.findOne({ $or: [{ email: login }, { username: login }] })
+  console.log(user)
   if (!user) return
   const isMatch = await bcrypt.compare(password, user.password!)
   if (isMatch) return user
