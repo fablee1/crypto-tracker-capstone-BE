@@ -1,7 +1,7 @@
 import jwt, { JwtPayload } from "jsonwebtoken"
 import { IJWTPayload } from "src/typings/jwt"
 import { IUserDocument } from "src/typings/users"
-import UserModel from "../users/model"
+import UserModel from "../../models/userModel"
 
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET
 const JWT_SECRET = process.env.JWT_SECRET

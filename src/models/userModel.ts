@@ -1,7 +1,7 @@
 import mongoose from "mongoose"
 import validator from "validator"
 import bcrypt from "bcrypt"
-import { IUserDocument, IUserModel } from "../../typings/users"
+import { IUserDocument, IUserModel } from "../typings/users"
 
 const { isEmail } = validator
 const { Schema, model } = mongoose
@@ -10,18 +10,17 @@ const UserSchema = new Schema<IUserDocument, IUserModel>(
   {
     name: {
       type: String,
-      required: true,
     },
     surname: {
       type: String,
-      required: true,
     },
+    username: { type: String, unique: true },
     email: {
       type: String,
       validate: { validator: isEmail, message: "Invalid email." },
       unique: true,
-      required: true,
     },
+    favourites: [{ type: Schema.Types.ObjectId, ref: "Crypto" }],
     password: String,
     avatar: String,
     refreshToken: String,
@@ -30,7 +29,7 @@ const UserSchema = new Schema<IUserDocument, IUserModel>(
 )
 
 UserSchema.pre("save", async function (next) {
-  if (this.isModified("password")) this.password = await bcrypt.hash(this.password!, 20)
+  if (this.isModified("password")) this.password = await bcrypt.hash(this.password!, 10)
   next()
 })
 
