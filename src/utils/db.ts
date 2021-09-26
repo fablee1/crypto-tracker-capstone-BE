@@ -16,8 +16,12 @@ export const addNewCryptoHistory = async (id: string, todayTimestamp: number) =>
   }
   newTokenHistory.historical1D[newTokenHistory.historical1D.length - 1].timestamp =
     todayTimestamp
-  const newModel = new CryptoHistoryModel(newTokenHistory)
-  await newModel.save()
+  const updatedHistory = await CryptoHistoryModel.findOneAndUpdate(
+    { id: id },
+    newTokenHistory,
+    { upsert: true, new: true }
+  )
+  return updatedHistory
 }
 
 export const updateLastPricesAndInfo = async () => {
