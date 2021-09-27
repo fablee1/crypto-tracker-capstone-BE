@@ -7,6 +7,7 @@ import morgan from "morgan"
 import usersRouter from "./services/users/routes"
 import authRouter from "./services/auth/routes"
 import cryptoRouter from "./services/crypto/routes"
+import portfolioRouter from "./services/portfolio/routes"
 
 import { corsOptions } from "./settings/cors"
 import cookieParser from "cookie-parser"
@@ -24,6 +25,7 @@ app.use(morgan("dev"))
 app.use("/users", usersRouter)
 app.use("/auth", authRouter)
 app.use("/crypto", cryptoRouter)
+app.use("/portfolio", portfolioRouter)
 
 // ERRORS MIDDLEWARE
 app.use(errorsMiddleware)
