@@ -1,10 +1,23 @@
 import mongoose from "mongoose"
 import validator from "validator"
 import bcrypt from "bcrypt"
-import { IUserDocument, IUserModel } from "../typings/users"
+import {
+  IUserDocument,
+  IUserModel,
+  IUserPortfolioActionsDocument,
+} from "../typings/users"
 
 const { isEmail } = validator
 const { Schema, model } = mongoose
+
+const UserPortfolioActionsSchema = new Schema<IUserPortfolioActionsDocument>(
+  {
+    action: String,
+    amount: Schema.Types.Decimal128,
+    date: Date,
+  },
+  { timestamps: true }
+)
 
 const UserSchema = new Schema<IUserDocument, IUserModel>(
   {
@@ -21,6 +34,7 @@ const UserSchema = new Schema<IUserDocument, IUserModel>(
       unique: true,
     },
     favourites: [{ type: String, ref: "Crypto" }],
+    portfolio: [{ coinId: String, actions: [UserPortfolioActionsSchema] }],
     password: String,
     avatar: String,
     refreshToken: String,
