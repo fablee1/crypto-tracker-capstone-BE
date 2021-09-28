@@ -14,9 +14,11 @@ agenda.define("fetch all prices", async () => {
 agenda.define("check if each token history is present and updated", async () => {
   const allTokenIds = await CryptoCurrencyModel.find({}, "id -_id")
   for (const token of allTokenIds) {
-    const t: ICryptoHistoryDocument | null = await CryptoHistoryModel.findOne({
-      id: token.id,
-    })
+    const t: ICryptoHistoryDocument | null = (await CryptoHistoryModel.collection.findOne(
+      {
+        id: token.id,
+      }
+    )) as ICryptoHistoryDocument
 
     const today = new Date()
     const todayTimestamp = new Date(
@@ -25,17 +27,16 @@ agenda.define("check if each token history is present and updated", async () => 
       today.getDate(),
       1
     ).getTime()
-
-    if (t) {
-      const lastElement = t.historical1D?.pop()
-      if (!(lastElement?.timestamp === todayTimestamp)) {
+    try {
+      if (t) {
+        const lastElement = t?.historical1D?.pop()
+        if (!(lastElement?.timestamp === todayTimestamp)) {
+          await addNewCryptoHistory(token.id, todayTimestamp)
+        }
+      } else {
         await addNewCryptoHistory(token.id, todayTimestamp)
-        await sleep(1900)
       }
-    } else {
-      await addNewCryptoHistory(token.id, todayTimestamp)
-      await sleep(1900)
-    }
+    } catch {}
   }
 })
 

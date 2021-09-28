@@ -29,28 +29,30 @@ export const updateLastPricesAndInfo = async () => {
   const pages = 4
 
   for (let page = 1; page <= pages; page++) {
-    const data = await getCryptocurrencyDataSlice(page, limit)
+    try {
+      const data = await getCryptocurrencyDataSlice(page, limit)
 
-    const query = data.map((c: { [key: string]: any }) => {
-      const updateQuery: { [key: string]: any } = {}
-      Object.keys(c).forEach((key) => (updateQuery[key] = c[key]))
-      return {
-        updateOne: {
-          filter: { id: c.id },
-          update: {
-            $set: updateQuery,
-            $push: {
-              last1hPrice: {
-                $each: [c.current_price],
-                $slice: -120,
+      const query = data.map((c: { [key: string]: any }) => {
+        const updateQuery: { [key: string]: any } = {}
+        Object.keys(c).forEach((key) => (updateQuery[key] = c[key]))
+        return {
+          updateOne: {
+            filter: { id: c.id },
+            update: {
+              $set: updateQuery,
+              $push: {
+                last1hPrice: {
+                  $each: [c.current_price],
+                  $slice: -120,
+                },
               },
             },
+            upsert: true,
           },
-          upsert: true,
-        },
-      }
-    })
+        }
+      })
 
-    await cryptoCurrencyModel.bulkWrite(query)
+      await cryptoCurrencyModel.bulkWrite(query)
+    } catch {}
   }
 }

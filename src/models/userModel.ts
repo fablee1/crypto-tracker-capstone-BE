@@ -49,7 +49,6 @@ UserSchema.pre("save", async function (next) {
 
 UserSchema.statics.checkCredentials = async function (login, password) {
   const user = await this.findOne({ $or: [{ email: login }, { username: login }] })
-  console.log(user)
   if (!user) return
   const isMatch = await bcrypt.compare(password, user.password!)
   if (isMatch) return user
