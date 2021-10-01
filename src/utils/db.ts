@@ -1,9 +1,11 @@
 import CryptoHistoryModel from "../models/cryptoHistoryModel"
 import {
   getCryptocurrencyDataSlice,
+  getExchanges,
   getSingleCryptocurrencyHistory,
 } from "../axios/coingecko"
-import cryptoCurrencyModel from "../models/cryptoCurrencyModel"
+import CryptoCurrencyModel from "../models/cryptoCurrencyModel"
+import ExchangeModel from "../models/exchangeModel"
 
 export const addNewCryptoHistory = async (id: string, todayTimestamp: number) => {
   const { prices } = await getSingleCryptocurrencyHistory(id)
@@ -52,7 +54,30 @@ export const updateLastPricesAndInfo = async () => {
         }
       })
 
-      await cryptoCurrencyModel.bulkWrite(query)
+      await CryptoCurrencyModel.bulkWrite(query)
+    } catch {}
+  }
+}
+
+export const updateExchanges = async () => {
+  const limit = 250
+  const pages = 2
+
+  for (let page = 1; page <= pages; page++) {
+    try {
+      const data = await getExchanges(page, limit)
+
+      const query = data.map((e: { [key: string]: any }) => {
+        return {
+          updateOne: {
+            filter: { id: e.id },
+            update: e,
+            upsert: true,
+          },
+        }
+      })
+
+      await ExchangeModel.bulkWrite(query)
     } catch {}
   }
 }

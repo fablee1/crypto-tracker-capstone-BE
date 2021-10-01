@@ -1,4 +1,4 @@
-import mongoose, { Document, Model, Schema } from "mongoose"
+import { Document, Model, Schema } from "mongoose"
 
 export interface ICryptoCurrency {
   id: string

@@ -1,8 +1,11 @@
 import Agenda from "agenda"
 import CryptoHistoryModel from "../models/cryptoHistoryModel"
 import CryptoCurrencyModel from "../models/cryptoCurrencyModel"
-import { sleep } from "../utils"
-import { addNewCryptoHistory, updateLastPricesAndInfo } from "../utils/db"
+import {
+  addNewCryptoHistory,
+  updateExchanges,
+  updateLastPricesAndInfo,
+} from "../utils/db"
 import { ICryptoHistoryDocument } from "../typings/cryptoHistory"
 
 const agenda = new Agenda({ db: { address: process.env.ATLAS_URL! } })
@@ -40,9 +43,14 @@ agenda.define("check if each token history is present and updated", async () => 
   }
 })
 
+agenda.define("update exchanges info", async () => {
+  await updateExchanges()
+})
+
 export const startAgenda = async () => {
   await agenda.start()
 
   await agenda.every("30 seconds", "fetch all prices")
   await agenda.every("2 hours", "check if each token history is present and updated")
+  await agenda.every("day", "update exchanges info")
 }

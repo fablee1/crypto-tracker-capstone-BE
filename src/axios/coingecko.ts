@@ -1,10 +1,18 @@
 import { coingecko } from "."
 import { ICryptoCurrency } from "../typings/cryptocurrencies"
 import { AxiosResponse } from "axios"
+import { IExchange } from "src/typings/exchanges"
 
 export const getCryptocurrencyDataSlice = async (page: number, limit: number) => {
   const { data }: AxiosResponse<ICryptoCurrency[]> = await coingecko.get(
     `/coins/markets?vs_currency=usd&page=${page}&per_page=${limit}`
+  )
+  return data
+}
+
+export const getExchanges = async (page: number, limit: number) => {
+  const { data }: AxiosResponse<IExchange[]> = await coingecko.get(
+    `/exchanges?page=${page}&per_page=${limit}`
   )
   return data
 }
