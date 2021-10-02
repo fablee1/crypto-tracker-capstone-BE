@@ -5,25 +5,31 @@ import { TController } from "../../typings/controllers"
 // Models
 import userModel from "../../models/userModel"
 import { IUserDocument } from "../../typings/users"
+import { ITransaction } from "../../typings/transaction"
 
-export const addAsset: TController = async (req, res, next) => {
+export const addData: TController = async (req, res, next) => {
   const user: IUserDocument | undefined = req.user
   try {
-    const newAction = {
-      action: req.body.action,
-      amount: req.body.amount,
+    const data: ITransaction = req.body
+    if (user) {
+      if (data.type === "buy") {
+        const index = user.portfolio.findIndex((c) => c.coinId === data.coin)
+        if (index === -1) {
+          user.portfolio.push({ coinId: data.coin, amount: data.quantity })
+        } else {
+          user.portfolio[index].amount += data.quantity
+        }
+      } else if (data.type === "sell") {
+        const index = user.portfolio.findIndex((c) => c.coinId === data.coin)
+        if (index === -1) {
+          user.portfolio.push({ coinId: data.coin, amount: -data.quantity })
+        } else {
+          user.portfolio[index].amount -= data.quantity
+        }
+      }
     }
-
-    const result = await userModel.findOneAndUpdate(
-      { _id: user?._id, "portfolio.coinId": req.body.coinId },
-      { $push: { "portfolio.$.actions": newAction } }
-    )
-    if (!result)
-      await userModel.findOneAndUpdate(
-        { _id: user?._id },
-        { $push: { portfolio: { coinId: req.body.coinId, actions: [{ newAction }] } } }
-      )
-
+    user?.transactions.push(data)
+    await user?.save()
     res.sendStatus(200)
   } catch (error) {
     console.log(error)

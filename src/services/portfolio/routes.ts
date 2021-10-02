@@ -4,6 +4,6 @@ import * as controllers from "./controllers"
 
 const router = Router()
 
-router.post("/add", JWTAuthMiddleware, controllers.addAsset)
+router.post("/add", JWTAuthMiddleware, controllers.addData)
 
 export default router

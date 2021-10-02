@@ -6,15 +6,25 @@ import {
   IUserModel,
   IUserPortfolioActionsDocument,
 } from "../typings/users"
+import { ITransaction } from "../typings/transaction"
 
 const { isEmail } = validator
 const { Schema, model } = mongoose
 
-const UserPortfolioActionsSchema = new Schema<IUserPortfolioActionsDocument>(
+const UserPortfolioActionsSchema = new Schema<ITransaction>(
   {
-    action: String,
-    amount: Schema.Types.Decimal128,
+    type: String,
+    from: String,
+    coin: String,
+    to: String,
+    exchange: String,
+    for: String,
+    total: Schema.Types.Decimal128,
+    quantity: Schema.Types.Decimal128,
+    fee: Schema.Types.Decimal128,
     date: Date,
+    time: String,
+    notes: String,
   },
   { timestamps: true }
 )
@@ -34,7 +44,8 @@ const UserSchema = new Schema<IUserDocument, IUserModel>(
       unique: true,
     },
     favourites: [{ type: String, ref: "Crypto" }],
-    portfolio: [{ coinId: String, actions: [UserPortfolioActionsSchema] }],
+    portfolio: [{ coinId: String, amount: Schema.Types.Decimal128 }],
+    transactions: [UserPortfolioActionsSchema],
     password: String,
     avatar: String,
     refreshToken: String,
