@@ -19,11 +19,3 @@ export interface IUserDocument extends Document, IUser {}
 export interface IUserModel extends Model<IUserDocument> {
   checkCredentials(email: string, password: string): Promise<IUserDocument | null>
 }
-
-export interface IUserPortfolioActions {
-  action: string
-  amount: number
-  date: Date
-}
-
-export interface IUserPortfolioActionsDocument extends Document, IUserPortfolioActions {}

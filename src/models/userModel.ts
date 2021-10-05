@@ -28,10 +28,14 @@ const UserTransactionsSchema = new Schema<ITransactionDocument, ITransactionMode
 
 const UserPortfolioSchema = new Schema<IPortfolioDocument, IPortfolioModel>(
   {
-    coinId: String,
+    coinId: { type: String },
     amount: { type: Schema.Types.Decimal128, get: getFloats },
   },
-  { toJSON: { getters: true }, toObject: { getters: true }, id: false }
+  {
+    toJSON: { getters: true },
+    toObject: { getters: true },
+    id: false,
+  }
 )
 
 const UserSchema = new Schema<IUserDocument, IUserModel>(
@@ -48,14 +52,19 @@ const UserSchema = new Schema<IUserDocument, IUserModel>(
       validate: { validator: isEmail, message: "Invalid email." },
       unique: true,
     },
-    favourites: [{ type: String, ref: "Crypto" }],
+    favourites: [{ type: String }],
     portfolio: [UserPortfolioSchema],
     transactions: [UserTransactionsSchema],
     password: String,
     avatar: String,
     refreshToken: String,
   },
-  { timestamps: true, toJSON: { getters: true }, toObject: { getters: true }, id: false }
+  {
+    timestamps: true,
+    toJSON: { getters: true },
+    toObject: { getters: true },
+    id: false,
+  }
 )
 
 function getFloats(value: number) {
