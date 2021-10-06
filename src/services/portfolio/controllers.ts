@@ -14,24 +14,32 @@ export const addData: TController = async (req, res, next) => {
     if (user) {
       let index = user.portfolio.findIndex((c) => c.coinId === data.coin)
       if (index === -1) {
-        user.portfolio.push({ coinId: data.coin, amount: 0 })
+        user.portfolio.push({ coinId: data.coin, amount: 0, averageBuyPrice: 0 })
         index = user.portfolio.findIndex((c) => c.coinId === data.coin)
       }
+
+      const portfolio = user.portfolio[index]
+
       if (data.type === "buy") {
-        user.portfolio[index].amount = new BigNumber(user.portfolio[index].amount)
+        portfolio.amount = new BigNumber(portfolio.amount as number)
           .plus(data.quantity as number)
           .toNumber()
+        portfolio.averageBuyPrice = new BigNumber(portfolio.averageBuyPrice as number)
+          .multipliedBy(portfolio.amount - (data.quantity as number))
+          .plus(data.total as number)
+          .dividedBy(portfolio.amount)
+          .toNumber()
       } else if (data.type === "sell") {
-        user.portfolio[index].amount = new BigNumber(user.portfolio[index].amount)
+        portfolio.amount = new BigNumber(portfolio.amount as number)
           .minus(data.quantity as number)
           .toNumber()
       } else if (data.type === "transfer") {
         if (data.from !== "external") {
-          user.portfolio[index].amount = new BigNumber(user.portfolio[index].amount)
+          portfolio.amount = new BigNumber(portfolio.amount as number)
             .minus(data.quantity as number)
             .toNumber()
         } else if (data.to !== "external") {
-          user.portfolio[index].amount = new BigNumber(user.portfolio[index].amount)
+          portfolio.amount = new BigNumber(portfolio.amount as number)
             .plus(data.quantity as number)
             .toNumber()
         }

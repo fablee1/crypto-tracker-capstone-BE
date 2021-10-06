@@ -5,13 +5,19 @@ import { ISocketDictionary } from "./typings/sockets"
 
 const server = createServer(app)
 
-const io = new Server(server, { allowEIO3: true })
+export const io = new Server(server, { allowEIO3: true })
 
-const sockets: ISocketDictionary = {}
+export const sockets: ISocketDictionary = {}
 
 // adding "event listeners"
 io.on("connection", (socket) => {
-  console.log(`Socket ${socket.id} has connected!`)
+  socket.on("listenCoinUpdates", (data) => {
+    sockets[socket.id] = { socket, coins: data }
+  })
+
+  socket.on("disconnect", () => {
+    delete sockets[socket.id]
+  })
 })
 
 export default server

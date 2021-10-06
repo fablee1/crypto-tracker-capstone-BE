@@ -1,5 +1,5 @@
 import { Socket } from "socket.io"
 
 export interface ISocketDictionary {
-  [key: string]: Socket
+  [key: string]: { socket: Socket; coins: string[] }
 }

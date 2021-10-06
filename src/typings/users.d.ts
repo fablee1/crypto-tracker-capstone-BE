@@ -1,4 +1,5 @@
 import mongoose, { Document, Model, Schema } from "mongoose"
+import { IPortfolio } from "./portfolio"
 import { ITransaction } from "./transaction"
 
 export interface IUser {
@@ -10,7 +11,7 @@ export interface IUser {
   avatar?: string
   refreshToken?: string
   favourites: string[]
-  portfolio: { coinId: string; amount: number }[]
+  portfolio: IPortfolio[]
   transactions: ITransaction[]
 }
 

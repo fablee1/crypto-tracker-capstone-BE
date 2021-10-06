@@ -44,7 +44,7 @@ const CryptoCurrenciesSchema = new Schema<ICryptoCurrencyDocument, ICryptoCurren
 )
 
 function getFloats(value: number) {
-  if (typeof value !== "undefined") {
+  if (typeof value !== "undefined" && value) {
     return parseFloat(value.toString())
   }
   return value

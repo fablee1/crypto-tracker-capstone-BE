@@ -30,6 +30,7 @@ const UserPortfolioSchema = new Schema<IPortfolioDocument, IPortfolioModel>(
   {
     coinId: { type: String },
     amount: { type: Schema.Types.Decimal128, get: getFloats },
+    averageBuyPrice: { type: Schema.Types.Decimal128, get: getFloats },
   },
   {
     toJSON: { getters: true },
@@ -68,7 +69,7 @@ const UserSchema = new Schema<IUserDocument, IUserModel>(
 )
 
 function getFloats(value: number) {
-  if (typeof value !== "undefined") {
+  if (typeof value !== "undefined" && value) {
     return parseFloat(value.toString())
   }
   return value

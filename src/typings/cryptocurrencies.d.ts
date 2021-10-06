@@ -32,6 +32,7 @@ export interface ICryptoCurrency {
     percentage: number
   }
   last_updated?: Date
+  historical1D?: any
 }
 
 export interface ICryptoCurrencyDocument extends Document, ICryptoCurrency {}

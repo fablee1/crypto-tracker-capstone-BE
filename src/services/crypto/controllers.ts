@@ -3,6 +3,7 @@ import CryptoCurrencyModel from "../../models/cryptoCurrencyModel"
 import { TController } from "../../typings/controllers"
 import CryptoHistoryModel from "../../models/cryptoHistoryModel"
 import { IUserDocument } from "src/typings/users"
+import { ICryptoHistoryDocument } from "src/typings/cryptoHistory"
 import cryptoCurrencyModel from "../../models/cryptoCurrencyModel"
 
 export const getHistory: TController = async (req, res, next) => {
@@ -38,9 +39,23 @@ export const getMyCoins: TController = async (req, res, next) => {
         new Set(user.portfolio.map((holding) => holding.coinId).concat(user.favourites))
       )
       const coins = await cryptoCurrencyModel.find({ id: allUserCoinIds })
-      res.send(coins)
+      const coinsHistory1Month: ICryptoHistoryDocument[] = await CryptoHistoryModel.find(
+        {
+          id: allUserCoinIds,
+        },
+        { historical1D: { $slice: -30 } }
+      )
+      const coinsWithHistory = coins.map((c) => {
+        return {
+          ...c.toObject(),
+          historical1D: coinsHistory1Month.find((hist) => c.id === hist.id)?.historical1D,
+        }
+      })
+
+      res.send(coinsWithHistory)
     }
   } catch (error) {
+    console.log(error)
     next(error)
   }
 }
