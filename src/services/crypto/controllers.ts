@@ -5,6 +5,8 @@ import CryptoHistoryModel from "../../models/cryptoHistoryModel"
 import { IUserDocument } from "src/typings/users"
 import { ICryptoHistoryDocument } from "src/typings/cryptoHistory"
 import cryptoCurrencyModel from "../../models/cryptoCurrencyModel"
+import { cmc } from "../../axios"
+import { AxiosResponse } from "axios"
 
 export const getHistory: TController = async (req, res, next) => {
   try {
@@ -55,7 +57,21 @@ export const getMyCoins: TController = async (req, res, next) => {
       res.send(coinsWithHistory)
     }
   } catch (error) {
-    console.log(error)
+    next(error)
+  }
+}
+
+export const getMarketStats: TController = async (req, res, next) => {
+  try {
+    const { data } = await cmc.get("/v1/global-metrics/quotes/latest")
+    const necessaryData = {
+      total_market_cap: data.data.quote.USD.total_market_cap,
+      btc_dominance: data.data.btc_dominance,
+      cryptos: data.data.total_cryptocurrencies,
+      exchanges: data.data.total_exchanges,
+    }
+    res.send(necessaryData)
+  } catch (error) {
     next(error)
   }
 }

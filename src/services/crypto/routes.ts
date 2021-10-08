@@ -8,5 +8,6 @@ router
   .get("/:id/history", controllers.getHistory)
   .get("/all", controllers.getAllCoins)
   .get("/myCoins", JWTAuthMiddleware, controllers.getMyCoins)
+  .get("/market", JWTAuthMiddleware, controllers.getMarketStats)
 
 export default router
