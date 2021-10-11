@@ -14,6 +14,5 @@ router
     userAvatarParser.single("avatar"),
     controllers.changeMyProfileImage
   )
-  .post("/me/favourites/:coinId", JWTAuthMiddleware, controllers.toggleFavourites)
 
 export default router

@@ -43,27 +43,3 @@ export const changeMyProfileImage: TController = async (req, res, next) => {
     next(error)
   }
 }
-
-export const toggleFavourites: TController = async (req, res, next) => {
-  const user: IUserDocument | undefined = req.user
-  const coin = req.params.coinId.toLowerCase()
-  try {
-    if (user) {
-      if (!user.favourites.includes(coin)) {
-        user.favourites.push(coin)
-        await user.save()
-        const addedCoin = await CryptoCurrencyModel.findOne({ id: coin })
-        res.send(addedCoin)
-      } else {
-        user.favourites = user.favourites.filter((cId) => cId !== coin)
-        await user.save()
-        res.sendStatus(200)
-      }
-    } else {
-      next(createError(404, `User not found!`))
-    }
-  } catch (error) {
-    console.log(error)
-    next(error)
-  }
-}

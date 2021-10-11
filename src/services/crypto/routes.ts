@@ -6,8 +6,10 @@ const router = Router()
 
 router
   .get("/:id/history", controllers.getHistory)
-  .get("/all", controllers.getAllCoins)
+  .get("/all", controllers.getAllCoinsMin)
+  .get("/full", controllers.getAllCoins)
   .get("/myCoins", JWTAuthMiddleware, controllers.getMyCoins)
   .get("/market", JWTAuthMiddleware, controllers.getMarketStats)
+  .post("/favourites/:coinId", JWTAuthMiddleware, controllers.toggleFavourites)
 
 export default router
