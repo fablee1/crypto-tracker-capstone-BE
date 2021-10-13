@@ -9,6 +9,8 @@ import { ITransaction } from "../../typings/transaction"
 import cryptoHistoryModel from "../../models/cryptoHistoryModel"
 import { ICryptoHistoryDocument } from "src/typings/cryptoHistory"
 import { getTimestamp240DaysAgo } from "../../utils/dates"
+import { getDataBefore8Months } from "../../utils/portfolio"
+import { processTransaction } from "../../utils/portfolio"
 
 export const addData: TController = async (req, res, next) => {
   const user: IUserDocument | undefined = req.user
@@ -67,7 +69,7 @@ export const getPortfolioValueData: TController = async (req, res, next) => {
     if (user) {
       const transTokens = Array.from(
         new Set(user.transactions.map((trans) => [trans.coin, trans?.for]).flat(1))
-      ).filter((token) => token !== "USD") as string[]
+      ).filter((token) => token !== "usd") as string[]
 
       const tokensWithHistory: ICryptoHistoryDocument[] = await cryptoHistoryModel.find(
         {
@@ -88,10 +90,10 @@ export const getPortfolioValueData: TController = async (req, res, next) => {
         [key: string]: { timestamp: number; price: number }[]
       } = {}
       tokensWithHistory.forEach((token) => {
-        tokenHistories[token.id] = token.historical1D?.slice(-240)!
+        tokenHistories[token.id] = token.historical1D!
       })
 
-      const initialData: {
+      let initialData: {
         invested: {
           [key: string]: number
         }
@@ -108,44 +110,59 @@ export const getPortfolioValueData: TController = async (req, res, next) => {
         initialData.coinsBalances[token] = 0
       })
 
-      timestamps.forEach((timestamp, i) => {
-        if (i === 0) {
-          const timestamp240DaysAgo = getTimestamp240DaysAgo()
-          const indexOfFirstTimestampOnOrAfterSpecifiedDate =
-            sortedTransactions.findIndex(
-              (trans) => trans.date.valueOf() < timestamp240DaysAgo
-            )
-          if (indexOfFirstTimestampOnOrAfterSpecifiedDate !== -1) {
-            sortedTransactions
-              .slice(0, indexOfFirstTimestampOnOrAfterSpecifiedDate + 1)
-              .forEach((trans) => {})
-          }
+      const timestamp240DaysAgo = getTimestamp240DaysAgo()
+      const indexOfFirstTimestampOnOrAfterSpecifiedDate = sortedTransactions.findIndex(
+        (trans) => trans.date.valueOf() >= timestamp240DaysAgo
+      )
+      if (indexOfFirstTimestampOnOrAfterSpecifiedDate !== -1) {
+        const dataBefore8Months = getDataBefore8Months(
+          sortedTransactions.slice(0, indexOfFirstTimestampOnOrAfterSpecifiedDate),
+          initialData
+        )
+        initialData = dataBefore8Months
+      }
+
+      const finalChartDataArray: {
+        timestamp: number
+        invested: number
+        portfolioValue: number
+      }[] = []
+      const transactionsInLast8Months = sortedTransactions.slice(
+        indexOfFirstTimestampOnOrAfterSpecifiedDate
+      )
+
+      let count = 0
+      timestamps.reduce((prev, curr) => {
+        while (
+          (transactionsInLast8Months[0] as ITransaction).date.valueOf() + 3600000 ===
+          curr
+        ) {
+          prev = processTransaction(
+            transactionsInLast8Months.shift() as ITransaction,
+            prev
+          )
         }
-      })
+        const invested = Object.values(prev.invested).reduce((a, b) => a + b, 0)
+        const portfolioValue = Object.keys(prev.coinsBalances).reduce((a, b) => {
+          if (b === "usd") {
+            return a + prev.coinsBalances[b]
+          } else {
+            return a + tokenHistories[b][count].price * prev.coinsBalances[b]
+          }
+        }, 0)
 
-      // user?.transactions?.forEach((trans) => console.log(trans.date.setHours(1).valueOf()))
+        count++
 
-      // const portfolioValueData = []
+        finalChartDataArray.push({
+          timestamp: curr,
+          invested: invested,
+          portfolioValue: portfolioValue,
+        })
 
-      // transTokens?.forEach((token) => {
-      //   const tokenTrans = user?.transactions
-      //     .filter((trans) => trans.coin === token)
-      //     .sort((a, b) => a.date.valueOf() - b.date.valueOf())
+        return prev
+      }, initialData)
 
-      //   let tokenHistory = tokensWithHistory.find((t) => t.id === token)?.historical1D as {
-      //     timestamp: number
-      //     price: number
-      //   }[]
-      //   if (tokenHistory.length >= 240) {
-      //     tokenHistory = tokenHistory.slice(-240)
-      //     tokenHistory.forEach((hist, index) => {
-      //       if (index === 0) {
-      //       }
-      //     })
-      //   }
-      // })
-
-      res.send(tokensWithHistory)
+      res.send(finalChartDataArray)
     }
   } catch (error) {
     console.log(error)
