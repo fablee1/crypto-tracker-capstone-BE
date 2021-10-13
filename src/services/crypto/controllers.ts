@@ -114,7 +114,19 @@ export const toggleFavourites: TController = async (req, res, next) => {
         user.favourites.push(coin)
         await user.save()
         const addedCoin = await CryptoCurrencyModel.findOne({ id: coin })
-        res.send(addedCoin)
+        const coinHistory1Month: ICryptoHistoryDocument | null =
+          await CryptoHistoryModel.findOne(
+            {
+              id: coin,
+            },
+            { historical1D: { $slice: -30 } }
+          )
+
+        const addedCoinWithHistory = {
+          ...addedCoin?.toObject(),
+          historical1D: coinHistory1Month?.historical1D,
+        }
+        res.send(addedCoinWithHistory)
       } else {
         user.favourites = user.favourites.filter((cId) => cId !== coin)
         await user.save()
