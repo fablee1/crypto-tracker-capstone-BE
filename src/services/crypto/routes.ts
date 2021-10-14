@@ -11,5 +11,6 @@ router
   .get("/myCoins", JWTAuthMiddleware, controllers.getMyCoins)
   .get("/market", JWTAuthMiddleware, controllers.getMarketStats)
   .post("/favourites/:coinId", JWTAuthMiddleware, controllers.toggleFavourites)
+  .get("/:id", JWTAuthMiddleware, controllers.getSingleCoin)
 
 export default router

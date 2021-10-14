@@ -139,3 +139,18 @@ export const toggleFavourites: TController = async (req, res, next) => {
     next(error)
   }
 }
+
+export const getSingleCoin: TController = async (req, res, next) => {
+  const user: IUserDocument | undefined = req.user
+  const coinId = req.params.id.toLowerCase()
+  try {
+    if (user) {
+      const coinData = await cryptoCurrencyModel.findOne({ id: coinId })
+      res.send(coinData)
+    } else {
+      next(createError(404, `User not found!`))
+    }
+  } catch (error) {
+    next(error)
+  }
+}
