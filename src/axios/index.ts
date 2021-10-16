@@ -14,3 +14,10 @@ export const cmc = axios.create({
     "X-CMC_PRO_API_KEY": process.env.COINMARKETCAP_API_KEY,
   },
 })
+
+export const cryptoCompare = axios.create({
+  baseURL: "https://min-api.cryptocompare.com/data/v2",
+  headers: {
+    Authorization: `Apikey ${process.env.CRYPTOCOMPARE_API_KEY}`,
+  },
+})
