@@ -2,7 +2,7 @@ import createError from "http-errors"
 import { TController } from "src/typings/controllers"
 import { getTokens } from "../auth/tools"
 import { refreshTokens } from "./tools"
-import UserModel from "../users/model"
+import UserModel from "../../models/userModel"
 import { Response } from "express"
 
 const cookiesConfig = {
@@ -11,9 +11,13 @@ const cookiesConfig = {
   // sameSite: "none",
 }
 
-const sendTokens = (res: Response, tokens: { [key: string]: string | undefined }) => {
+const sendTokens = async (
+  res: Response,
+  tokens: { [key: string]: string | undefined }
+) => {
   const tokenTypes = ["accessToken", "refreshToken"]
   tokenTypes.forEach((t) => res.cookie(t, tokens[t], cookiesConfig))
+  console.log("ok")
   res.sendStatus(204)
 }
 
@@ -34,17 +38,18 @@ export const registerUser: TController = async (req, res, next) => {
   try {
     newUser.avatar = `https://ui-avatars.com/api/?name=${req.body.name}+${req.body.surname}`
     const user = await new UserModel(newUser).save()
+
     const tokens = await getTokens(user)
-    sendTokens(res, tokens)
+    await sendTokens(res, tokens)
   } catch (error) {
     next(createError(400, error as Error))
   }
 }
 
 export const loginUser: TController = async (req, res, next) => {
-  const { email, password } = req.body
+  const { login, password } = req.body
   try {
-    const user = await UserModel.checkCredentials(email, password)
+    const user = await UserModel.checkCredentials(login, password)
     if (!user) return next(createError(401, "Invalid credentials"))
     const tokens = await getTokens(user)
     sendTokens(res, tokens)
