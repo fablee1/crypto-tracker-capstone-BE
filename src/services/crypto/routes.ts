@@ -1,6 +1,6 @@
 import { Router } from "express"
 import cache from "../../redis-cache"
-import JWTAuthMiddleware from "../../../src/middlewares/jwtauth"
+import JWTAuthMiddleware from "../../middlewares/jwtauth"
 import * as controllers from "./controllers"
 
 const router = Router()

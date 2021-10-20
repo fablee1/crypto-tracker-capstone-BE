@@ -1,5 +1,5 @@
 import createError from "http-errors"
-import { TController } from "src/typings/controllers"
+import { TController } from "../../typings/controllers"
 import { getTokens } from "../auth/tools"
 import { refreshTokens } from "./tools"
 import UserModel from "../../models/userModel"

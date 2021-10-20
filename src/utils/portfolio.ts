@@ -1,4 +1,4 @@
-import { ITransaction } from "src/typings/transaction"
+import { ITransaction } from "../typings/transaction"
 import { BigNumber } from "bignumber.js"
 
 export const processTransaction = (

@@ -2,11 +2,10 @@ import createError from "http-errors"
 import CryptoCurrencyModel from "../../models/cryptoCurrencyModel"
 import { TController } from "../../typings/controllers"
 import CryptoHistoryModel from "../../models/cryptoHistoryModel"
-import { IUserDocument } from "src/typings/users"
-import { ICryptoHistoryDocument } from "src/typings/cryptoHistory"
+import { IUserDocument } from "../../typings/users"
+import { ICryptoHistoryDocument } from "../../typings/cryptoHistory"
 import cryptoCurrencyModel from "../../models/cryptoCurrencyModel"
 import { cmc } from "../../axios"
-import { AxiosResponse } from "axios"
 
 export const getHistory: TController = async (req, res, next) => {
   try {
