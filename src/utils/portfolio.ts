@@ -62,8 +62,8 @@ export const processTransaction = (
     )
       .minus(transaction.quantity as number)
       .toNumber()
-  } else if (transaction.type === "transactionfer") {
-    // available transactionfer sources: external, wallet, :any exchange:
+  } else if (transaction.type === "transaction") {
+    // available transaction sources: external, wallet, :any exchange:
     if (transaction.from !== "external") {
       data.coinsBalances[transaction.coin] = new BigNumber(
         data.coinsBalances[transaction.coin]

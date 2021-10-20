@@ -36,10 +36,10 @@ export const getAllCoinsMin: TController = async (req, res, next) => {
 export const getAllCoins: TController = async (req, res, next) => {
   try {
     const allCoins = await CryptoCurrencyModel.find(
-      {},
-      "-_id name symbol id image market_cap_rank current_price price_change_percentage_24h market_cap total_volume circulating_supply"
+      { market_cap_rank: { $exists: true, $ne: undefined } },
+      "-_id name symbol id image market_cap_rank current_price price_change_percentage_24h price_change_24h market_cap total_volume circulating_supply"
     )
-      .limit(100)
+      .limit(50)
       .sort({ market_cap_rank: "asc" })
 
     const coinsHistory1Month: ICryptoHistoryDocument[] = await CryptoHistoryModel.find(
