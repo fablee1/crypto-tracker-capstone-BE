@@ -11,6 +11,7 @@ import { ICryptoHistoryDocument } from "src/typings/cryptoHistory"
 import { getTimestamp240DaysAgo } from "../../utils/dates"
 import { getDataBefore8Months } from "../../utils/portfolio"
 import { processTransaction } from "../../utils/portfolio"
+import cryptoCurrencyModel from "../../models/cryptoCurrencyModel"
 
 export const addData: TController = async (req, res, next) => {
   const user: IUserDocument | undefined = req.user
@@ -21,8 +22,21 @@ export const addData: TController = async (req, res, next) => {
     date.setHours(1)
     data.date = date
 
+    let index
+    let coinData = null
     if (user) {
-      let index = user.portfolio.findIndex((c) => c.coinId === data.coin)
+      index = user.portfolio.findIndex((c) => c.coinId === data.coin)
+
+      if (index === -1) {
+        coinData = (await cryptoCurrencyModel.findOne({ id: data.coin }))?.toObject()
+        if (coinData) {
+          const coinHistory = (await cryptoHistoryModel.findOne({
+            id: data.coin,
+          })) as ICryptoHistoryDocument
+          coinData.historical1D = coinHistory?.toObject().historical1D
+        }
+      }
+
       if (index === -1) {
         user.portfolio.push({ coinId: data.coin, amount: 0, averageBuyPrice: 0 })
         index = user.portfolio.findIndex((c) => c.coinId === data.coin)
@@ -56,9 +70,17 @@ export const addData: TController = async (req, res, next) => {
       }
     }
     user?.transactions.push(data)
+
     await user?.save()
-    res.sendStatus(200)
+
+    const newData = user?.toObject()
+    res.send({
+      trans: newData?.transactions.slice(-1),
+      portfolio: newData?.portfolio,
+      coinData,
+    })
   } catch (error) {
+    console.log(error)
     next(error)
   }
 }
@@ -90,7 +112,18 @@ export const getPortfolioValueData: TController = async (req, res, next) => {
         [key: string]: { timestamp: number; price: number }[]
       } = {}
       tokensWithHistory.forEach((token) => {
-        tokenHistories[token.id] = token.historical1D!
+        if (token.historical1D && token.historical1D.length < 240) {
+          const arrayToFill: any[] = []
+          timestamps.slice(0, 240 - token.historical1D.length).forEach((ts) => {
+            arrayToFill.push({
+              price: (token.historical1D as any)[0].price,
+              timestamp: ts,
+            })
+          })
+          tokenHistories[token.id] = arrayToFill.concat(token.historical1D)
+        } else {
+          tokenHistories[token.id] = token.historical1D!
+        }
       })
 
       let initialData: {
@@ -112,8 +145,9 @@ export const getPortfolioValueData: TController = async (req, res, next) => {
 
       const timestamp240DaysAgo = getTimestamp240DaysAgo()
       const indexOfFirstTimestampOnOrAfterSpecifiedDate = sortedTransactions.findIndex(
-        (trans) => trans.date.valueOf() >= timestamp240DaysAgo
+        (trans) => trans.date.valueOf() + 360000 >= timestamp240DaysAgo
       )
+
       if (indexOfFirstTimestampOnOrAfterSpecifiedDate !== -1) {
         const dataBefore8Months = getDataBefore8Months(
           sortedTransactions.slice(0, indexOfFirstTimestampOnOrAfterSpecifiedDate),
@@ -133,20 +167,28 @@ export const getPortfolioValueData: TController = async (req, res, next) => {
 
       let count = 0
       timestamps.reduce((prev, curr) => {
-        while (
-          (transactionsInLast8Months[0] as ITransaction).date.valueOf() + 3600000 ===
-          curr
-        ) {
-          prev = processTransaction(
-            transactionsInLast8Months.shift() as ITransaction,
-            prev
-          )
+        if (transactionsInLast8Months.length > 0) {
+          let targetTrans = transactionsInLast8Months[0]
+          targetTrans.date.setHours(1, 0, 0, 0)
+          while (targetTrans.date.valueOf() === curr) {
+            prev = processTransaction(
+              transactionsInLast8Months.shift() as ITransaction,
+              prev
+            )
+            if (transactionsInLast8Months[0]) {
+              targetTrans = transactionsInLast8Months[0]
+              targetTrans.date.setHours(1, 0, 0, 0)
+            } else {
+              break
+            }
+          }
         }
         const invested = Object.values(prev.invested).reduce((a, b) => a + b, 0)
         const portfolioValue = Object.keys(prev.coinsBalances).reduce((a, b) => {
           if (b === "usd") {
             return a + prev.coinsBalances[b]
           } else {
+            console.log(b)
             return a + tokenHistories[b][count].price * prev.coinsBalances[b]
           }
         }, 0)

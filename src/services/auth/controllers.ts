@@ -17,7 +17,6 @@ const sendTokens = async (
 ) => {
   const tokenTypes = ["accessToken", "refreshToken"]
   tokenTypes.forEach((t) => res.cookie(t, tokens[t], cookiesConfig))
-  console.log("ok")
   res.sendStatus(204)
 }
 
