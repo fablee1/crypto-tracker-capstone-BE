@@ -6,7 +6,15 @@ import * as controllers from "./controllers"
 const router = Router()
 
 router
-  .get("/:id/history", cache.route("coinHistory", 300), controllers.getHistory)
+  .get(
+    "/:id/history",
+    function (req, res, next) {
+      res.express_redis_cache_name = "history-" + req.params.id
+      next()
+    },
+    cache.route(300),
+    controllers.getHistory
+  )
   .get("/all", cache.route("coinsMin", 30), controllers.getAllCoinsMin)
   .get("/full", cache.route("coinsFull", 30), controllers.getAllCoins)
   .get("/market", cache.route("market", 60), controllers.getMarketStats)
