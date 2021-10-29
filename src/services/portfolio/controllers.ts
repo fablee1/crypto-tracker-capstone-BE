@@ -188,6 +188,7 @@ export const getPortfolioValueData: TController = async (req, res, next) => {
           if (b === "usd") {
             return a + prev.coinsBalances[b]
           } else {
+            console.log(b)
             return a + tokenHistories[b][count].price * prev.coinsBalances[b]
           }
         }, 0)

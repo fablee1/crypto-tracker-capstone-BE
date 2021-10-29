@@ -8,6 +8,7 @@ import { Response } from "express"
 const cookiesConfig = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production" ? true : false,
+  sameSite: "none",
 }
 
 const sendTokens = async (
